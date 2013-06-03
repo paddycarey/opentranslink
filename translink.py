@@ -4,6 +4,9 @@ Python script that fetches Translink NI timetable data and processes it into
 something that can be easily worked with in python. Could be used as the basis
 for building a simple timetable API.
 
+Thanks to @Tyndyll for https://github.com/tyndyll/translink-extraction which
+was the inspiration for this script and a bug help for parts
+
 Copyright (c) 2013 Patrick Carey
 
 Permission to use, copy, modify, and/or distribute this software for any
