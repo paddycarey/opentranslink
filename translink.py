@@ -72,13 +72,23 @@ def parse_routes(route_soup):
     routes = OrderedDefaultdict(dict)
 
     # check if this is the last page of results
-    page_nums = route_soup.find('div', attrs={'class': 'rgWrap rgNumPart'}).find_all('a')
-    last_page = [x.get('class') for x in page_nums][-1] is not None
+    try:
+        page_nums = route_soup.find('div', attrs={'class': 'rgWrap rgNumPart'}).find_all('a')
+    except AttributeError:
+        last_page = True
+    else:
+        last_page = [x.get('class') for x in page_nums][-1] is not None
 
     # build dict containg details of routes on page
-    table = route_soup.find(id='ctl00_MainRegion_rptPageList_ctl00')
+    # table = route_soup.find(id='ctl00_MainRegion_rptPageList_ctl00')
+    table = route_soup.find_all('a', attrs={'class': 'timetable-ico'})[1].parent.parent.parent.parent
     for row in table.find('tbody').find_all('tr'):
-        columns = row.find_all('td')
+        # get columns, discarding any that are empty
+        columns = [x for x in row.find_all('td') if x.get_text().strip()]
+        # skip empty or malformed rows
+        if not columns or len(columns) < 3:
+            continue
+        # parse route and add to dict
         routes[columns[0].get_text().strip()][columns[2].get_text().strip().lower()] = {
             'name': columns[1].get_text().strip(),
             'url': "http://www.translink.co.uk" + columns[1].a['href'],
@@ -212,6 +222,16 @@ def parse_timetable_page(timetable_data):
             yield journey
 
 
+def get_timetable(service, route_number, direction):
+    """
+    Convenience function to return a timetable for a single route
+    """
+
+    routes = fetch_routes(service)
+    route = routes[route_number]
+    timetable = parse_timetable_page(fetch_page(route[direction.lower()]['url']))
+    return timetable
+
 if __name__ == '__main__':
 
     help_text = """Translink Extractor 0.0.1
@@ -244,8 +264,11 @@ if __name__ == '__main__':
                 print '    ' + inner_value['url']
             print
     else:
-        routes = fetch_routes(arguments['<service>'])
-        route = routes[arguments['<route_number>']]
-        print json.dumps(route, indent=2)
-        timetable = parse_timetable_page(fetch_page(route[arguments['<direction>'].lower()]['url']))
+        # get command line arguments
+        service = arguments['<service>']
+        route_number = arguments['<route_number>']
+        direction = arguments['<direction>']
+        # get timetable data
+        timetable = get_timetable(service, route_number, direction)
+        # timetable is a generator, so listify it and dump to json for pretty printing
         print json.dumps(list(timetable), indent=2)
