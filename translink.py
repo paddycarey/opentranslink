@@ -104,14 +104,34 @@ def fetch_routes(service):
 
     # dict containing base urls for each of the services we need
     base_urls = {
-        "metro": "http://www.translink.co.uk/Services/Metro-Service-Page/",
         "ulsterbus": "http://www.translink.co.uk/Services/Ulsterbus-Service-Page/Routes--Timetables/All-Timetables1/",
         "goldline": "http://www.translink.co.uk/Services/Goldline/Routes--Timetables/All-Timetables/",
         "rail": "http://www.translink.co.uk/Services/NI-Railways/",
         "enterprise": "http://www.translink.co.uk/Services/Enterprise/"
     }
 
-    base_url = base_urls[service]
+    if service == 'metro':
+        routes = {}
+        for base_url in fetch_metro_base_urls("http://www.translink.co.uk/Services/Metro-Service-Page/"):
+            routes.update(fetch_routes_for_base_url(base_url))
+        return routes
+    else:
+        return fetch_routes_for_base_url(base_urls[service])
+
+
+def fetch_metro_base_urls(url):
+
+    soup = BeautifulSoup(fetch_page(url))
+    table = soup.find('table', attrs={'summary': 'Metro Routes'})
+    for row in table.find_all('tr'):
+        try:
+            yield "http://www.translink.co.uk" + row.find_all('td')[0].a['href']
+        except TypeError:
+            pass
+
+
+def fetch_routes_for_base_url(base_url):
+
     # fetch the first page of results, pagination's done with POST requests so
     # we'll do any subsequent pages in a loop after parsing
     soup = BeautifulSoup(fetch_page(base_url))
