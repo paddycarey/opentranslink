@@ -13,7 +13,7 @@ Python module to handle scraping and parsing of timetable data from translink.co
       -h --help     Show this screen.
       --version     Show version.
 
-Thanks to @Tyndyll for https://github.com/tyndyll/translink-extraction which
+Thanks to [@Tyndyll](https://twitter.com/tyndyll) for https://github.com/tyndyll/translink-extraction which
 was the inspiration for this script and a bug help for parts
 
     TODO: Developer documentation
