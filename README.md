@@ -3,6 +3,15 @@ Translink Extractor 0.0.1
 
 Python module to handle scraping and parsing of timetable data from translink.co.uk
 
+Thanks to [@Tyndyll](https://twitter.com/tyndyll) for https://github.com/tyndyll/translink-extraction which
+was the inspiration for this script and a big help in parts
+
+    TODO: Fix Metro parsing
+    TODO: Developer documentation
+    TODO: Unit tests
+
+Command-line usage:
+-------------------
     Usage:
       translink.py --routes <service>
       translink.py <service> <route_number> <direction>
@@ -13,12 +22,39 @@ Python module to handle scraping and parsing of timetable data from translink.co
       -h --help     Show this screen.
       --version     Show version.
 
-Thanks to [@Tyndyll](https://twitter.com/tyndyll) for https://github.com/tyndyll/translink-extraction which
-was the inspiration for this script and a big help in parts
+API usage:
+----------
+```python
+>>> from translink import get_timetable
+>>> timetable = get_timetable('rail', 4, 'inbound')
+>>> print json.dumps([x for x in timetable][-1])
+{
+  "days_of_operation": "Su",
+  "operator": "NIR",
+  "service": "4",
+  "stops": [
+    {
+      "stop_name": "Portrush, (NIR) Rail Station",
+      "time": "2110"
+    },
+    {
+      "stop_name": "Dhu Varren, (NIR) Rail Station",
+      "time": "2112"
+    },
+    {
+      "stop_name": "Coleraine Univ, (NIR) Rail Station",
+      "time": "2118"
+    },
+    {
+      "stop_name": "Coleraine, (NIR) Rail Station",
+      "time": "2122"
+    }
+  ]
+}
 
-    TODO: Fix Metro parsing
-    TODO: Developer documentation
-    TODO: Unit tests
+```
+
+
 
 Copyright (c) 2013 Patrick Carey
 
