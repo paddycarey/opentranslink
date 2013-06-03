@@ -234,7 +234,6 @@ if __name__ == '__main__':
 
     # parse the command line args with docopt
     arguments = docopt(help_text, version='Translink Extractor 0.0.1')
-    print(arguments)
 
     if arguments['--routes']:
         routes = fetch_routes(arguments['<service>'])
