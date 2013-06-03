@@ -25,7 +25,7 @@ Command-line usage:
 API usage:
 ----------
 ```python
->>> from translink import get_timetable
+>>> from translink_extractor import get_timetable
 >>> timetable = get_timetable('rail', 4, 'inbound')
 >>> print json.dumps([x for x in timetable][-1])
 {
