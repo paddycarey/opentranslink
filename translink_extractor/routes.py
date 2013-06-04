@@ -10,10 +10,10 @@ from .utils import make_get_request
 from .utils import make_post_request
 
 # public objects (well, as public as it gets in pythonland)
-__all__ = ['fetch_all_routes', 'fetch_routes']
+__all__ = ['fetch_all_routes', 'fetch_routes', 'service_urls']
 
 # dict containing base urls for each of the services we can parse routes from
-base_urls = {
+service_urls = {
     "metro": "http://www.translink.co.uk/Services/Metro-Service-Page/",
     "ulsterbus": "http://www.translink.co.uk/Services/Ulsterbus-Service-Page/Routes--Timetables/All-Timetables1/",
     "goldline": "http://www.translink.co.uk/Services/Goldline/Routes--Timetables/All-Timetables/",
@@ -28,7 +28,7 @@ def fetch_all_routes():
     """
 
     services = {}
-    for service in base_urls:
+    for service in service_urls:
         services[service] = fetch_routes(service)
     return services
 
@@ -46,7 +46,7 @@ def fetch_routes(service):
         have this intermediate step
         """
 
-        soup = BeautifulSoup(make_get_request(base_urls['metro']))
+        soup = BeautifulSoup(make_get_request(service_urls['metro']))
         table = soup.find('table', attrs={'summary': 'Metro Routes'})
         for row in table.find_all('tr'):
             try:
@@ -60,7 +60,7 @@ def fetch_routes(service):
             routes.update(fetch_routes_for_base_url(base_url))
         return routes
     else:
-        return fetch_routes_for_base_url(base_urls[service])
+        return fetch_routes_for_base_url(service_urls[service])
 
 
 def fetch_routes_for_base_url(base_url):
