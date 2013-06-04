@@ -17,7 +17,7 @@ from .routes import fetch_routes
 from .utils import make_get_request
 
 # public objects (well, as public as it gets in pythonland)
-__all__ = ['parse_timetable_page', 'get_timetable']
+__all__ = ['parse_timetable_page', 'get_timetable', 'get_timetable_by_url']
 
 
 def parse_timetable_fragment(table):
@@ -94,4 +94,13 @@ def get_timetable(service, route_number, direction):
     routes = fetch_routes(service)
     route = routes[route_number]
     timetable = parse_timetable_page(make_get_request(route[direction.lower()]['url']))
+    return timetable
+
+
+def get_timetable_by_url(url):
+    """
+    Convenience function to return a timetable for a single route given a url
+    """
+
+    timetable = parse_timetable_page(make_get_request(url))
     return timetable

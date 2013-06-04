@@ -5,7 +5,7 @@ Functions to facilitate scraping and parsing of routes from translink.co.uk
 from bs4 import BeautifulSoup
 
 # local imports
-from .utils import OrderedDefaultdict
+from .utils import OrderedDefaultDict
 from .utils import make_get_request
 from .utils import make_post_request
 
@@ -119,7 +119,7 @@ def parse_routes(route_soup):
     Parse routes from a given service page
     """
 
-    routes = OrderedDefaultdict(dict)
+    routes = OrderedDefaultDict(dict)
 
     # check if this is the last page of results
     try:

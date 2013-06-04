@@ -8,4 +8,5 @@ from .routes import fetch_all_routes
 from .routes import fetch_routes
 from .routes import service_urls
 from .timetables import get_timetable
+from .timetables import get_timetable_by_url
 from .timetables import parse_timetable_page
