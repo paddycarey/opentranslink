@@ -1,8 +1,43 @@
 # stdlib imports
+import time
+import urllib
+import urllib2
 from collections import OrderedDict, Callable
 
-# third-party imports
-import requests
+
+def retry(ExceptionToCheck, tries=4, delay=0.5, backoff=2, logger=None):
+
+    """
+    Ye olde retry decorator
+
+    Catches exceptions in wrapped funcs and retries them using an exponential
+    backoff until a maximum number of retries has been reached, at which point
+    it raises the original exception if the func is still failing
+    """
+
+    def deco_retry(f):
+        def f_retry(*args, **kwargs):
+            mtries, mdelay = tries, delay
+            try_one_last_time = True
+            while mtries > 1:
+                try:
+                    return f(*args, **kwargs)
+                    try_one_last_time = False
+                    break
+                except ExceptionToCheck, e:
+                    msg = "%s, Retrying in %d seconds..." % (str(e), mdelay)
+                    if logger:
+                        logger.warning(msg)
+                    else:
+                        print msg
+                    time.sleep(mdelay)
+                    mtries -= 1
+                    mdelay *= backoff
+            if try_one_last_time:
+                return f(*args, **kwargs)
+            return
+        return f_retry  # true decorator
+    return deco_retry
 
 
 class OrderedDefaultDict(OrderedDict):
@@ -48,11 +83,12 @@ class OrderedDefaultDict(OrderedDict):
 
 # http related functions
 
+@retry(urllib2.HTTPError)
 def make_get_request(url):
     """
     Fetch the given url, returning its contents as a string
     """
-    return requests.get(url).text
+    return urllib2.urlopen(url).read()
 
 
 def make_post_request(url, formdata):
@@ -60,4 +96,4 @@ def make_post_request(url, formdata):
     Make a post request to the given url, encoding formdata as the body of the
     request
     """
-    return requests.post(url, data=formdata).text
+    return urllib2.urlopen(url, urllib.urlencode(formdata)).read()
