@@ -33,11 +33,17 @@ def fetch_all_routes():
     return services
 
 
-def fetch_routes(service):
+def fetch_routes(service, cache=None):
     """
     Given a service name, fetch a list of routes, their names, ids and urls
     from which we can parse the timetable data we need
     """
+
+    cache_key = 'routes-' + service
+    if cache is not None:
+        result = cache.get(cache_key)
+        if result is not None:
+            return result
 
     def fetch_metro_base_urls():
         """
@@ -58,9 +64,15 @@ def fetch_routes(service):
         routes = {}
         for base_url in fetch_metro_base_urls():
             routes.update(fetch_routes_for_base_url(base_url))
-        return routes
+        result = routes
     else:
-        return fetch_routes_for_base_url(service_urls[service])
+        result = fetch_routes_for_base_url(service_urls[service])
+
+    if cache is not None:
+        print 'caching results'
+        print result
+        cache.set(cache_key, result)
+    return result
 
 
 def fetch_routes_for_base_url(base_url):

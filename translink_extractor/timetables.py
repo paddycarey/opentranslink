@@ -86,14 +86,24 @@ def parse_timetable_page(timetable_data):
             yield journey
 
 
-def get_timetable(service, route_number, direction):
+def get_timetable(service, route_number, direction, cache=None):
     """
     Convenience function to return a timetable for a single route
     """
 
+    cache_key = '%s-%s-%s' % (str(service), str(route_number), str(direction))
+    if cache is not None:
+        result = cache.get(cache_key)
+        if result is not None:
+            return result
+
     routes = fetch_routes(service)
     route = routes[route_number]
-    timetable = parse_timetable_page(make_get_request(route[direction.lower()]['url']))
+    timetable = list(parse_timetable_page(make_get_request(route[direction.lower()]['url'])))
+
+    if cache is not None:
+        cache.set(cache_key, timetable)
+
     return timetable
 
 

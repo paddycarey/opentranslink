@@ -22,6 +22,13 @@ from docopt import docopt
 from translink_extractor import fetch_routes
 from translink_extractor import get_timetable
 
+# try to import memcache client
+try:
+    import memcache
+    mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+except ImportError:
+    mc = None
+
 
 if __name__ == '__main__':
 
@@ -29,7 +36,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__, version='Translink Extractor 0.0.1')
 
     if arguments['--routes']:
-        routes = fetch_routes(arguments['<service>'])
+        routes = fetch_routes(arguments['<service>'], cache=mc)
         for key, value in routes.items():
             print key
             for inner_key, inner_value in value.items():
@@ -42,6 +49,6 @@ if __name__ == '__main__':
         route_number = arguments['<route_number>']
         direction = arguments['<direction>']
         # get timetable data
-        timetable = get_timetable(service, route_number, direction)
+        timetable = get_timetable(service, route_number, direction, cache=mc)
         # timetable is a generator, so listify it and dump to json for pretty printing
         print json.dumps(list(timetable), indent=2)
