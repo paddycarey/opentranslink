@@ -1,6 +1,9 @@
 Translink Extractor 0.0.1
 =========================
 
+### Note: Translink's refusal to offer any sort of real API means this project is currently broken due to a site update. Unfortunately I don't have time to fix it currently, but if you're so inclined, please feel free.
+
+
 Python module to handle scraping and parsing of timetable data from translink.co.uk
 
 Thanks to [@Tyndyll](https://twitter.com/tyndyll) for https://github.com/tyndyll/translink-extraction which
