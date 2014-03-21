@@ -147,4 +147,7 @@ class Service(object):
                 pass
         # add the correct submit button to the formdata and return
         form_data[submit_buttons['rgPageNext']['name']] = ''
+        form_data['__EVENTTARGET'] = ''
+        form_data['__EVENTARGUMENT'] = ''
+        form_data['ctl00$MainRegion$rptPageListCurrent$ctl00$ctl03$ctl01$ctl12'] = ''
         return form_data
