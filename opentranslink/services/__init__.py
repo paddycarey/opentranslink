@@ -5,17 +5,35 @@ from __future__ import unicode_literals
 
 # stdlib imports
 import urllib
-from urlparse import parse_qsl
-from urlparse import urlparse
+try:
+    # python 3+
+    from urllib.parse import parse_qsl
+    from urllib.parse import urlparse
+except ImportError:
+    # python 2+
+    from urlparse import parse_qsl
+    from urlparse import urlparse
 
 # local imports
-from .routes import Route
-from .utils import make_request
+from ..routes import Route
+from ..utils import make_request
 
+from . import nir
 
 class InvalidServiceError(Exception):
     pass
 
+class ServiceRegistry(object):
+    def __init__(self):
+        self._service_name_to_class_map = {}
+
+    def register(self, service_name, service_class):
+        assert service_name not in self._service_name_to_class_map
+        self._service_name_to_class_map[service_name] = service_class
+
+    def deregister(self, service_name):
+        assert service_name in self._service_name_to_class_map
+        del self._service_name_to_class_map[service_name]
 
 class Service(object):
 
