@@ -25,26 +25,73 @@ class InvalidServiceError(Exception):
 
 class ServiceRegistry(object):
     def __init__(self):
-        self._service_name_to_class_map = {}
+        self._service_name_to_provider_map = {}
+        self._uri_prefix_to_provider_map = {}
 
-    def register(self, service_name, service_class):
+    def register(self, service_name, service_info_provider):
         assert service_name not in self._service_name_to_class_map
-        self._service_name_to_class_map[service_name] = service_class
+
+        self._service_name_to_provider_map[service_name] = service_info_provider
+        self._uri_prefix_to_provider_map[uri_prefix] = service_info_provider
 
     def deregister(self, service_name):
         assert service_name in self._service_name_to_class_map
-        del self._service_name_to_class_map[service_name]
+        del self._service_name_to_provider_map[service_name]
+        del self._uri_prefix_to_provider_map[service_name]
 
-class Service(object):
+    def all_services_for_uri_prefix(self, uri_prefix):
+        raise NotImplementedError()
 
-    base_url = 'http://www.translink.co.uk/Routes-and-Timetables/{0}/'
-    valid_services = ['metro', 'ulsterbus', 'goldline', 'nir', 'enterprise']
+    def preferred_service_for_uri_prefix(self, uri_prefix):
+        return all_services_for_uri_prefix(self, uri_prefix)[0]
 
-    def __init__(self, service_name):
+class TransportServiceInfoProvider(object):
+    def __init__(self, service_name, loc_uri_provided):
+        """
+        Creates a new TransportService object, with the given service_name.
+        For each loc_uri in loc_uris_provided dictionary's keys, the
+        value is considered the score (relative to 0) at which this
+        ServiceInfoProvider should be scored.
+        """
+
         if service_name not in self.valid_services:
             raise InvalidServiceError('{0} is not a valid service name.'.format(service_name))
         self.service_name = service_name
-        self.service_url = self.base_url.format(service_name)
+        self.loc_uris_provided = loc_uris_provided
+ 
+class TransportServiceTimetableProvider(TransportServiceInfoProvider):
+   def route(self, code):
+        """
+        Returns the route that matches the given service code or None if not found
+        """
+        raise NotImplementedError()
+
+    def routes(self):
+        """
+        Return a list of routes supported by this service.
+        """
+        raise NotImplementedError()
+
+class TransportLiveInfoService(TransportServiceInfoProvider):
+    def next_journeys_between(self, src_loc_uri, dst_loc_uri):
+        """
+        Returns a list of upcoming journeys which serve the given dst_loc_uri,
+        from the given src_loc_uri.  Status information, such as depature times
+        and delays, is included.
+        """
+        raise NotImplementedError()
+
+class TranslinkServiceOfficialTimeTableProvider(TransportServiceTimetableProvider):
+    base_url = 'http://www.translink.co.uk/Routes-and-Timetables/{0}/'
+    valid_services = ['metro', 'ulsterbus', 'goldline', 'nir', 'enterprise']
+
+    def __init__(self, *args, subservice, **kwargs):
+        super(TranslinkServiceOfficialTimeTableProvider, self).__init__(*args, **kwargs)
+
+        assert subservice in self.__class__.valid_services
+
+        self.subservice = subservice
+        self.service_url = self.base_url.format(subservice)
         self._routes = None
 
     def route(self, code):
@@ -169,3 +216,15 @@ class Service(object):
         form_data['__EVENTARGUMENT'] = ''
         form_data['ctl00$MainRegion$rptPageListCurrent$ctl00$ctl03$ctl01$ctl12'] = ''
         return form_data
+
+def register_services(service_registry):
+    # register main timetable services by creating them in a loop based on service names
+    for subservice in TranslinkServiceOfficialTimeTableProvider.valid_services:
+        tt_service_info_provider = TranslinkServiceOfficialTimeTableProvider("official_translink_" + subservice + "_timetable_provider", subservice)
+        service_registry.register("translink-northern-ireland:/" + subservice, tt_service_info_provider)
+
+    # register nir next trains service directly
+    nir_live_info_provider = NotImplementedError()
+    raise nir_live_info_provider
+    service_registry.register("translink-northern-ireland:/nir", nir_live_info_provider)
+
