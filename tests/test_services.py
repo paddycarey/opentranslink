@@ -10,6 +10,12 @@ Tests for `opentranslink` module.
 # stdlib imports
 import unittest
 
+import os, sys
+THIS_DIR = os.path.dirname(__file__)
+PARENT_DIR = os.path.abspath(os.path.join(THIS_DIR, ".."))
+if PARENT_DIR not in sys.path:
+    sys.path = [ PARENT_DIR, ] + sys.path
+
 # local imports
 from opentranslink import InvalidServiceError
 from opentranslink import Service
